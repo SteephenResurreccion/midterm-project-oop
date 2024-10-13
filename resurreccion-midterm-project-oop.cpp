@@ -61,6 +61,10 @@ bool validInteger(string input, int &amount) {
     }
 }
 
+bool hasDecimal(const string& priceInput) {
+    return priceInput.find('.') != string::npos;
+}
+
 class ItemClass {
 private:
 	string id, name, category;
@@ -185,6 +189,8 @@ public:
 		cout << "Items in Category: " << category << endl;
 		string lowerCategory = toLowercase(category);
 		bool foundItems = false; 
+		cout << left << setw(15) << "Category" << setw(10) << "ID" << setw(35) << "Product Name" << setw(10) << "Quantity" << setw(12) << "Price" << endl;
+		cout << string(82, '-') << endl;
 		for (int i = 0; i < productCount; i++) {
 			string tempCategory = toLowercase(products[i]->getCategory());
 			if (tempCategory == lowerCategory) {
@@ -330,10 +336,11 @@ public:
 	void displaySearchedItemByID(string searchID) const {
 		string tempSearchID = toLowercase(searchID);
 		bool found = false;
+		cout << left << setw(15) << "Category" << setw(10) << "ID" << setw(35) << "Product Name" << setw(10) << "Quantity" << setw(12) << "Price" << endl;
+		cout << string(82, '-') << endl;
 		for (int i = 0; i < productCount; i++) {
 			string tempID = toLowercase(products[i]->getId());
 			if (tempID == tempSearchID) {
-				cout << "Item Found: ";
 				products[i]->displayItem();
 				found = true;
 			}
@@ -435,38 +442,61 @@ int main() {
 					cout<<"Press Any Key To Continue";getch(); system("cls");break;
 				}
 				while (!store.isItemValidNonCS(id)) {
-					cout << "Invalid item ID. Please try again: ";
+					cout << "Invalid item ID. Please try again, input 0 to go back: ";
 					getline(cin, id);
+					if(id=="0"){
+						cout<<"Press Any Key To Continue";getch(); system("cls");break;
+					}
+				}
+				if(id=="0"){
+					break;
 				}
 				currentQuantity = store.getItemQuantity(id);
 				currentPrice = store.getItemPrice(id);
 				cout << "Current Quantity: " << currentQuantity << endl;
 				cout << "Current Price: " << fixed << setprecision(2) << currentPrice << endl;
-					cout << "Do you want to update by: \n(1) Quantity or \n(2) Price?: ";
+				cout << "Do you want to update by: \n(1) Quantity \n(2) Price\nInput here: ";
+				getline(cin, choiceInput);
+				while (!validInteger(choiceInput, choice) || (choice != 1 && choice != 2)) {
+					cout << "	Invalid option. Please enter \n(0) to go back \n(1) for Quantity \n(2) for Price: ";
 					getline(cin, choiceInput);
-					while (!validInteger(choiceInput, choice) || (choice != 1 && choice != 2)) {
-						cout << "	Invalid option. Please enter \n(1) for Quantity or \n(2) for Price: ";
-						getline(cin, choiceInput);
+					if(choiceInput=="0"){
+						cout<<"Press Any Key To Continue";getch(); system("cls");break;
 					}
-					if (choice == 1) {
-						cout << "Enter new quantity: ";
+				}
+				if(choiceInput=="0"){
+					break;
+				}
+				if (choice == 1) {
+					cout << "Enter new quantity: ";
+					getline(cin, quantityInput);
+					while (to_string(currentQuantity) == quantityInput){
+						cout << "Must not be the same as current quantity: ";
 						getline(cin, quantityInput);
-						while (!validInteger(quantityInput, quantity)) {
-							cout << "Enter new quantity: ";
-							getline(cin, quantityInput);
-						}
-						cout << "Previous quantity: " << currentQuantity << " updated to " << quantity << endl;
-						store.updateItem(id, quantity, currentPrice);
-					} else if (choice == 2) {
-						cout << "Enter new price: ";
+					}
+					while (!validInteger(quantityInput, quantity)) {
+						cout << "Invalid Integer. Only enter numbers for quantity: ";
+						getline(cin, quantityInput);
+					}
+					store.updateItem(id, quantity, currentPrice);
+				} else if (choice == 2) {
+					cout << "Enter new price: ";
+					getline(cin, priceInput);
+					while (!validDouble(priceInput, price)) {
+						cout << "Invalid Double. Only enter numbers for price: ";
 						getline(cin, priceInput);
-						while (!validDouble(priceInput, price)) {
-							cout << "Enter new price: ";
+					}
+					while (price == currentPrice) {
+				        cout << "Must not be the same as current price: ";
+				        getline(cin, priceInput);
+					    while (!validDouble(priceInput, price)) {
+							cout << "Invalid Double. Only enter numbers for price: ";
 							getline(cin, priceInput);
 						}
-						cout << "Previous price: " << fixed << setprecision(2) << currentPrice << " updated to " << fixed << setprecision(2) << price << endl;
-						store.updateItem(id, currentQuantity, price);
 					}
+					cout << "Previous price: " << fixed << setprecision(2) << currentPrice << " updated to " << fixed << setprecision(2) << price << endl;
+					store.updateItem(id, currentQuantity, price);
+				}
 				cout<<"Successful. Press Any Key To Continue";getch(); system("cls");break;
 			case 3:
 				if (!store.hasProducts()) {
